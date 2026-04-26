@@ -77,7 +77,7 @@
             .from('scores')
             .select('*')
             .order('time', { ascending: true })
-            .limit(10);
+            .limit(20);
         
         const display = document.getElementById('lb-display');
         if (data && data.length > 0) {
