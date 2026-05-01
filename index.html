@@ -4,49 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Global Math Blitz: Carry & Borrow</title>
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #3ecf8e; --accent: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        :root { --primary: #3ecf8e; --accent: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --error: #f43f5e; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: manipulation; }
         body { background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 10px; }
         
-        #game-container { background: var(--card); padding: 1.5rem; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 440px; position: relative; border: 1px solid #334155; min-height: 580px; display: flex; flex-direction: column; }
+        #game-container { background: var(--card); padding: 1.5rem; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 440px; position: relative; border: 1px solid #334155; min-height: 600px; display: flex; flex-direction: column; }
         
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; }
         .timer-display { font-family: monospace; font-size: 1.4rem; color: var(--accent); font-weight: bold; }
 
         #question { font-size: clamp(3.5rem, 15vw, 5rem); font-weight: 900; color: #fff; letter-spacing: -3px; margin: 20px 0; }
         
-        /* Input & GO Button Layout */
         .input-group { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 10px; }
         input[type="number"] { background: #0f172a; color: var(--primary); font-size: 2.2rem; width: 140px; padding: 12px; border: 4px solid #334155; border-radius: 20px; text-align: center; outline: none; }
         input[type="number"]:focus { border-color: var(--primary); }
         
-        #mobile-go { background: var(--accent); color: #000; border: none; width: 80px; height: 65px; border-radius: 20px; font-weight: 900; font-size: 1.2rem; cursor: pointer; margin-top: 0; }
+        #mobile-go { background: var(--accent); color: #000; border: none; width: 80px; height: 65px; border-radius: 20px; font-weight: 900; font-size: 1.2rem; cursor: pointer; }
 
-        .screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--card); border-radius: 24px; z-index: 20; padding: 25px; flex-direction: column; align-items: center; justify-content: center; }
+        .screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--card); border-radius: 24px; z-index: 20; padding: 20px; flex-direction: column; align-items: center; justify-content: center; }
         .active-screen { display: flex; }
 
-        button { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; font-size: 1.1rem; }
+        button { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 1.1rem; }
         
-        .leaderboard { background: #0f172a; border-radius: 12px; width: 100%; height: 280px; overflow-y: auto; padding: 10px; margin: 15px 0; text-align: left; font-size: 0.9rem; border: 1px solid #1e293b; }
+        /* Leaderboard & Review Lists */
+        .scroll-list { background: #0f172a; border-radius: 12px; width: 100%; height: 250px; overflow-y: auto; padding: 10px; margin: 10px 0; text-align: left; font-size: 0.85rem; border: 1px solid #1e293b; }
         .entry { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1e293b; }
-        .gold { color: #fbbf24; font-weight: bold; border-left: 3px solid #fbbf24; padding-left: 5px; }
+        .gold { color: #fbbf24; font-weight: bold; border-left: 3px solid #fbbf24; padding-left: 8px; }
         
-        #feedback { height: 25px; margin-top: 5px; font-weight: bold; }
+        .rev-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #1e293b; }
+        .rev-correct { color: var(--primary); }
+        .rev-wrong { color: var(--error); font-weight: bold; }
+
+        #feedback { height: 20px; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <!-- START SCREEN -->
     <div id="screen-start" class="screen active-screen">
         <h1 style="margin-bottom:0;">Global Blitz</h1>
-        <p style="color: #94a3b8; margin-top:5px;">World Top 20 (Perfect 30/30)</p>
-        <div class="leaderboard" id="lb-display">Connecting to Global HQ...</div>
+        <p style="color: #94a3b8; margin-top:5px;">World Top 20 (Perfect Runs)</p>
+        <div class="scroll-list" id="lb-display">Connecting to Global HQ...</div>
         <input type="text" id="player-name" placeholder="Your Name" style="padding:12px; width:100%; border-radius:10px; border:none; text-align:center; background: #0f172a; color: white; border: 1px solid #334155;">
         <button onclick="startGame()">ENTER THE BLITZ</button>
     </div>
 
+    <!-- GAMEPLAY HUD -->
     <div id="game-hud" style="display:none;">
         <div class="header">
             <div id="name-tag">---</div>
@@ -54,28 +61,30 @@
         </div>
         <p style="font-size:0.75rem; color:#94a3b8; margin-top:10px; text-align:left;">PROGRESS: <span id="count">0/30</span></p>
         <div id="question">READY?</div>
-        
         <div class="input-group">
             <input type="number" id="ans-input" pattern="[0-9]*" inputmode="numeric" placeholder="?">
             <button id="mobile-go" onclick="handleInput()">GO</button>
         </div>
-        
         <div id="feedback"></div>
     </div>
 
+    <!-- RESULT SCREEN -->
     <div id="screen-result" class="screen">
-        <h2>Blitz Complete!</h2>
+        <h2 style="margin:0;">Blitz Results</h2>
         <p>Time: <strong id="final-time" style="color:var(--accent)">0.0s</strong></p>
-        <div id="db-status" style="margin: 15px 0; font-size: 0.85rem; color: var(--primary); min-height: 40px;"></div>
+        
+        <div id="db-status" style="font-size: 0.8rem; color: var(--primary); margin-bottom: 5px;"></div>
+        
+        <div class="scroll-list" id="review-list"></div>
+        
         <button onclick="location.reload()">Play Again</button>
     </div>
 </div>
 
 <script>
-    // === CONFIGURATION ===
+    // === CONFIG ===
     const SUPABASE_URL = 'https://hexersvqebwwowykhato.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_oOA7Fbs4SHlmBc11xdCYBA_ZujrZjCh';
-
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let batch = [], currentIdx = 0, startTime, timerInt, pName;
@@ -96,7 +105,7 @@
                 </div>`
             ).join('');
         } else { 
-            display.innerHTML = "No global scores yet. Set a record!"; 
+            display.innerHTML = "No global scores yet. Set the first record!"; 
         }
     }
 
@@ -111,7 +120,7 @@
             while ((a%10) >= (b%10));
             op = "-"; ans = a-b;
         }
-        return { prob: `${a} ${op} ${b}`, ans, correct: false };
+        return { prob: `${a} ${op} ${b}`, ans, correct: false, userAns: null };
     }
 
     function startGame() {
@@ -138,17 +147,16 @@
         document.getElementById('count').innerText = `${currentIdx+1}/30`;
     }
 
-    // Process Answer - Triggered by GO button or Enter key
     function handleInput() {
         const inputEl = document.getElementById('ans-input');
         const val = parseInt(inputEl.value);
         
         if(!isNaN(val)) {
+            batch[currentIdx].userAns = val;
             batch[currentIdx].correct = (val === batch[currentIdx].ans);
             currentIdx++; 
             inputEl.value = ""; 
             showQuestion();
-            // Critical for iOS: re-focus keeps the numeric pad up
             inputEl.focus(); 
         }
     }
@@ -162,23 +170,30 @@
         document.getElementById('screen-result').classList.add('active-screen');
         document.getElementById('final-time').innerText = finalTime.toFixed(1) + "s";
 
+        // Show Blitz Correction
+        const reviewEl = document.getElementById('review-list');
+        reviewEl.innerHTML = batch.map((q, i) => `
+            <div class="rev-item ${q.correct ? 'rev-correct' : 'rev-wrong'}">
+                <span>#${i+1}: ${q.prob}</span>
+                <span>${q.correct ? '✓' : 'You: ' + q.userAns} (Ans: ${q.ans})</span>
+            </div>
+        `).join('');
+
         if (perfect) {
             document.getElementById('db-status').innerText = "Syncing with Global Leaderboard...";
             const { error } = await _supabase.from('scores').insert([{ name: pName, time: finalTime }]);
-            document.getElementById('db-status').innerText = error ? "Upload failed (Check RLS Policies)." : "RANK REGISTERED!";
+            document.getElementById('db-status').innerText = error ? "Upload failed (Check RLS)." : "RANK REGISTERED!";
         } else {
             const wrongCount = batch.filter(q => !q.correct).length;
-            document.getElementById('db-status').innerText = `Missed ${wrongCount} answer(s). Only 100% accuracy ranks globally.`;
+            document.getElementById('db-status').innerText = `Missed ${wrongCount}. Only 100% ranks. Check review below:`;
             document.getElementById('db-status').style.color = "#f43f5e";
         }
     }
 
-    // Keyboard support for non-iOS devices
     document.getElementById('ans-input').addEventListener('keyup', (e) => {
         if(e.key === 'Enter') handleInput();
     });
 
-    // Initial Load
     loadLeaderboard();
 </script>
 </body>
